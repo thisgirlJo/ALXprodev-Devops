@@ -1,24 +1,20 @@
 #!/bin/bash
 
-# Extract fields using jq
+# Extract data from JSON using jq
 name=$(jq -r '.name' data.json)
 height_dm=$(jq -r '.height' data.json)   # height in decimeters
 weight_hg=$(jq -r '.weight' data.json)   # weight in hectograms
-
-# Extract the first type name (e.g., "electric")
 type=$(jq -r '.types[0].type.name' data.json)
 
-# Convert height to meters (decimeters to meters)
-height=$(echo "scale=1; $height_dm / 10" | bc)
+# Convert height from decimeters to meters using awk with 1 decimal place
+height=$(awk "BEGIN {printf \"%.1f\", $height_dm / 10}")
 
-# Convert weight to kilograms (hectograms to kilograms)
-weight=$(echo "scale=0; $weight_hg / 10" | bc)
+# Convert weight from hectograms to kilograms using awk (integer)
+weight=$(awk "BEGIN {printf \"%d\", $weight_hg / 10}")
 
-# Capitalize the type (first letter uppercase)
+# Capitalize first letter of name and type using sed
+name_cap=$(echo "$name" | sed 's/.*/\u&/')
 type_cap=$(echo "$type" | sed 's/.*/\u&/')
 
-# Capitalize name (just in case)
-name_cap=$(echo "$name" | sed 's/.*/\u&/')
-
-# Print formatted output
+# Format and print the final output
 echo "${name_cap} is of type ${type_cap}, weighs ${weight}kg, and is ${height}m tall."
